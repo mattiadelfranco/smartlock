@@ -37,7 +37,7 @@ class AccessController extends Controller
         } else {
             return response()->json(
                 [
-                    'message' => 'This NFC Key is not authorized to open this Doorlock'
+                    'message' => 'This NFC Key is not authorized to open this Doorlockk'
                 ], 401);
             }
     }
