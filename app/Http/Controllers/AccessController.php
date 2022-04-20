@@ -4,7 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AccessLog;
 use App\Models\Doorlock;
-use App\Models\NFCKey;
+use App\Models\NfcKey;
 use Illuminate\Http\Request;
 
 class AccessController extends Controller
@@ -14,7 +14,7 @@ class AccessController extends Controller
         $nfc_uid = $request->input('nfc_uid');
         $secret_key = $request->input('secret_key');
 
-        $nfcKey = NFCKey::where('nfc_uid', $nfc_uid)->first();
+        $nfcKey = NfcKey::where('nfc_uid', $nfc_uid)->first();
         $doorlock = Doorlock::where('secret_key', $secret_key)->first();
 
         if($nfcKey == null || $doorlock == null) {

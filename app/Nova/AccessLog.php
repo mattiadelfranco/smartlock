@@ -45,7 +45,7 @@ class AccessLog extends Resource
         return [
             ID::make()->sortable(),
             DateTime::make('created_at'),
-            BelongsTo::make('NfcKeys'),
+            BelongsTo::make('NfcKey'),
             BelongsTo::make('Doorlock')
         ];
     }
