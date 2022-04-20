@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AccessLog;
 use App\Models\Doorlock;
 use App\Models\NFCKey;
 use Illuminate\Http\Request;
@@ -24,6 +25,11 @@ class AccessController extends Controller
         }
 
         if($nfcKey->doorlock_id == $doorlock->id) {
+            $accessLog = new AccessLog;
+            $accessLog->doorlock_id = $doorlock->id;
+            $accessLog->nfckey_id = $nfcKey->id;
+            $accessLog->save();
+
             response()->json(
                 [
                     'message' => 'Door unlocked'

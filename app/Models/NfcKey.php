@@ -14,4 +14,8 @@ class NfcKey extends Model
     public function doorlock() {
         return $this->belongsTo(Doorlock::class);
     }
+
+    public function accesslogs() {
+        return $this->hasMany(AccessLog::class);
+    }
 }

@@ -15,7 +15,7 @@ class AccessLog extends Model
         return $this->belongsTo(Doorlock::class);
     }
 
-    public function nfcKey() {
+    public function nfckey() {
         return $this->belongsTo(NfcKey::class);
     }
 }
