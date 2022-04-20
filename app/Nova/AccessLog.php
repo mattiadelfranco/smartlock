@@ -5,6 +5,7 @@ namespace App\Nova;
 use Illuminate\Http\Request;
 use Laravel\Nova\Fields\BelongsTo;
 use Laravel\Nova\Fields\DateTime;
+use Laravel\Nova\Fields\HasOne;
 use Laravel\Nova\Fields\ID;
 use Laravel\Nova\Http\Requests\NovaRequest;
 
@@ -44,7 +45,7 @@ class AccessLog extends Resource
         return [
             ID::make()->sortable(),
             DateTime::make('created_at'),
-            BelongsTo::make('NFCKeys'),
+            BelongsTo::make('NfcKeys'),
             BelongsTo::make('Doorlock')
         ];
     }

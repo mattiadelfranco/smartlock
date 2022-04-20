@@ -23,3 +23,10 @@ class UsersTableSeeder extends Seeder
         ]);
     }
 }
+
+host     : app-75939402-6f02-4bae-b237-37a5f7aab517-do-user-11397729-0.b.db.ondigitalocean.com
+port     : 25060
+username : smartlockdb
+password : AVNS_VbXZ5rKbc9fmtsr
+database : smartlockdb
+sslmode  : require
