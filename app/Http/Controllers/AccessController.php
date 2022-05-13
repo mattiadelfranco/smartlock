@@ -17,6 +17,7 @@ class AccessController extends Controller
         $nfcKey = NfcKey::where('nfc_uid', $nfc_uid)->first();
         $doorlock = Doorlock::where('secret_key', $secret_key)->first();
 
+        // Se la NFC Key oppure la Doorlock non esistono nel Database entro in questo if e ritorno un errore con risposta HTTP Status Code 401
         if($nfcKey == null || $doorlock == null) {
             return response()->json(
                 [
