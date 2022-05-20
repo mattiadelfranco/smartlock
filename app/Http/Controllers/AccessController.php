@@ -11,9 +11,11 @@ class AccessController extends Controller
 {
     public function authenticate(Request $request) {
 
+        // Recupero dal body della richiesta HTTP POST i valori dei campi nfc_id e secret_key che mi ha inviato l'ESP32
         $nfc_uid = $request->input('nfc_uid');
         $secret_key = $request->input('secret_key');
 
+        // Ricerchiamo nel database se esistono un'entità NFCKey ed un'entità Doorlock rispettivamente con la NFC_UID e la SECRET_KEY ricevute in ingresso nella richiesta HTTP POST
         $nfcKey = NfcKey::where('nfc_uid', $nfc_uid)->first();
         $doorlock = Doorlock::where('secret_key', $secret_key)->first();
 
@@ -25,7 +27,10 @@ class AccessController extends Controller
                 ], 401);
         }
 
+        // Se trovo sia l'NFC Key e sia la Doorlock, valutiamo se sono associate tra loro
         if($nfcKey->doorlock_id == $doorlock->id) {
+
+            // Creo un nuovo Access Log nel database
             $accessLog = new AccessLog;
             $accessLog->doorlock_id = $doorlock->id;
             $accessLog->nfckey_id = $nfcKey->id;
