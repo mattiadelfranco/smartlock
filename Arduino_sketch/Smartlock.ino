@@ -1,29 +1,32 @@
-#include <LiquidCrystal_I2C.h> //SDA = 21, SCL = 22
-#include <HTTPClient.h>
+/* Librerie */
+#include <LiquidCrystal_I2C.h> // PIN su cui è collegato il Display, SDA = 21, SCL = 22
+#include <HTTPClient.h> // Client HTTP Library
 #include <WiFi.h> //Wifi library
 #include <MFRC522.h> //library responsible for communicating with the module RFID-RC522
 #include <SPI.h> //library responsible for communicating of SPI bus
 
+/* Costanti */
 #define SS_PIN 26
 #define RST_PIN 25
 
-/* Objects */
+/* Oggetti */
 MFRC522::MIFARE_Key key;
 MFRC522::StatusCode status; //authentication return status code
 MFRC522 mfrc522(SS_PIN, RST_PIN);
 
-WiFiClient client;
-LiquidCrystal_I2C lcd(0x27, 20, 4);
-HTTPClient http;
+WiFiClient client; // Oggetto client WiFi
+LiquidCrystal_I2C lcd(0x27, 20, 4); //
+HTTPClient http; // Client HTTP per effettuare le richieste POST
 
+/* Variabili */
 byte nuidPICC[4] = {0, 0, 0, 0}; // UID Tag NFC che viene scannerizzato
 const char* ssid = "iPhone di Mattia"; // SSID Rete Wifi
 const char* password = "davide500"; // Password rete Wifi
 String backendUrl = "https://smartlock.exibe.it/api/nfc-access"; // Endpoint of backend
 String backendSecretKey = "961bf611-a155-45bc-a768-01f47b6e2d40"; // Secret Key generated from Smartlock Backend, identifies the Doorlock
 String passepartoutNfcUid = "150C93FC"; // UID del Tag NFC che può sempre aprire la serratura
-String lcdCurrentText = "";
-int counter = 0; // Numero di tentativi falliti per la connessione al WiFi
+String lcdCurrentText = ""; // Testo attualmente mostrato sul display
+//int counter = 0; // Numero di tentativi falliti per la connessione al WiFi
 int relayPin = 32; // Pin su cui è collegato il Relè che pilota la serratura
 
 void setup() {
@@ -44,18 +47,26 @@ void setup() {
   WiFi.begin(ssid, password);
 }
 
-void debugLog(String message) {
-  Serial.println(message);
-}
+void loop() {
 
-void setupWifi() {
-  WiFi.begin(ssid, password);
-  while (WiFi.status() != WL_CONNECTED) {
+  if(WiFi.status() != WL_CONNECTED) {
+    readNFC(); // Dobbiamo leggere già un eventuale tag NFC avvicinato alla scatola per riconoscere il Passpartout
     delay(500);
     debugLog("Connecting to " + (String)ssid);
-    printOnLcd("Connessione WiFi in corso...");
+    printOnLcd("Connessione al WiFi in corso...");
   }
-  debugLog("WiFi connected with IP address: " + (String)WiFi.localIP());
+
+  while (WiFi.status() == WL_CONNECTED) {
+    debugLog("WiFi connected with IP address: " + (String)WiFi.localIP());
+    printOnLcd("Scannerizzare una chiave NFC");
+    readNFC();
+    delay(500);
+  }
+
+}
+
+void debugLog(String message) {
+  Serial.println(message);
 }
 
 void printOnLcd(String text) {
@@ -67,14 +78,10 @@ void printOnLcd(String text) {
 }
 
 int sendPostRequest(String url, String jsonBody) {
-  debugLog(jsonBody);
-  http.begin(url);
+  http.begin(url); // Mi connetto all'URL del Server specificato, conterrà il nostro Endpoint
   http.addHeader("Content-Type", "application/json");
-  int httpResponseCode = http.POST(jsonBody);
+  int httpResponseCode = http.POST(jsonBody); // Invio una richiesta HTTP di tipo POST che nel Body contiene il contenuto della variabile jsonBody
   http.end();  //Close connection
-
-  String payload = http.getString();
-  debugLog("Payload: " + payload);
 
   return httpResponseCode;
 }
@@ -107,24 +114,24 @@ void openLock() {
 
 void readNFC()
 {
-    if ( ! mfrc522.PICC_IsNewCardPresent())
+    if (!mfrc522.PICC_IsNewCardPresent())
     {
-     return;
+        return;
     }
 
     // Select a card
-    if ( ! mfrc522.PICC_ReadCardSerial())
+    if (!mfrc522.PICC_ReadCardSerial())
     {
-    return;
+        return;
     }
 
     /* Lettura dell'UID del Tag NFC e Conversione da Byte a String dell'UID */
     String nfcUid="";
     for (byte i = 0; i < mfrc522.uid.size; i++) {
-      nfcUid += String(mfrc522.uid.uidByte[i]< 0x10 ? "0" : "");
+      nfcUid += String(mfrc522.uid.uidByte[i] < 0x10 ? "0" : "");
       nfcUid += String(mfrc522.uid.uidByte[i], HEX);
     }
-    nfcUid.toUpperCase();
+    nfcUid.toUpperCase(); // Metto tutta la stringa in caratteri MAIUSCOLI
 
     //instructs the PICC when in the ACTIVE state to go to a "STOP" state
     mfrc522.PICC_HaltA();
@@ -139,22 +146,4 @@ void readNFC()
     } else if (WiFi.status() == WL_CONNECTED) {
       authenticateNfcKey(nfcUid);
     }
-}
-
-void loop() {
-
-  if(WiFi.status() != WL_CONNECTED) {
-    readNFC();
-    delay(500);
-    debugLog("Connecting to " + (String)ssid);
-    printOnLcd("Connessione al WiFi in corso...");
-  }
-
-  while (WiFi.status() == WL_CONNECTED) {
-    debugLog("WiFi connected with IP address: " + (String)WiFi.localIP());
-    printOnLcd("Scannerizzare una chiave NFC");
-    readNFC();
-    delay(500);
-  }
-
 }
