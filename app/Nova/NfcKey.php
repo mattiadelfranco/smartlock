@@ -46,7 +46,6 @@ class NfcKey extends Resource
         return [
             ID::make()->sortable(),
             Text::make('nfc_uid'),
-            Boolean::make('enabled'),
             BelongsTo::make('Doorlock'),
             HasMany::make('AccessLogs'),
         ];
